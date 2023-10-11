@@ -5,6 +5,33 @@ using namespace std;
 #include "parcial.h"
 
 
+
+bool sobreEscribirRegistro(Compra reg, int pos){
+    FILE *p;
+    p=fopen("compras.dat", "rb+");///+ agrega al modo lo que le falta
+    if(p==NULL){
+        return false;
+    }
+    fseek(p,sizeof (reg)*pos,0);
+    bool escribio=fwrite(&reg,sizeof reg,1,p);
+    fclose(p);
+    return escribio;
+}
+
+
+bool sobreEscribir(Material reg, int pos){
+    FILE *p;
+    p=fopen("materiales.dat", "rb+");///+ agrega al modo lo que le falta
+    if(p==NULL){
+        return false;
+    }
+    fseek(p,sizeof (reg)*pos,0);
+    bool escribio=fwrite(&reg,sizeof reg,1,p);
+    fclose(p);
+    return escribio;
+}
+
+
 ///a1) Para cada material la cantidad de compras que se hayan realizado entre todas las compras.
 
 void PuntoA(){
@@ -155,11 +182,13 @@ for(int x=0;x<cantidadObras;x++){
 
 
     float acu=0;
+
     for(int y=0;y<cantidadCompras;y++){
 
         objCompra=archCompra.leerRegistro(y);
 
-         if(objObra.getCodigoObra()==objCompra.getCodigoObra()){
+
+
 
         for(int i=0;i<CantMateriales;i++){
 
@@ -173,7 +202,7 @@ for(int x=0;x<cantidadObras;x++){
                 }
 
         }
-    }
+
 
     }
     cout<<"La obra: "<<objObra.getCodigoObra()<<" gasto: "<<acu<<"  en obra gruesa"<<endl;
@@ -186,9 +215,88 @@ for(int x=0;x<cantidadObras;x++){
 }
 
 void puntoE(){
-///a5) La/s provincia/s con más de 22 proveedores
+//a5) La/s provincia/s con más de 22 proveedores
+
+ArchivoProveedor  archProv("proveedores.dat");
+Proveedor objProv;
+int contarProv=archProv.contarRegistros();
+int provincias[24]={};
+
+for(int y=0;y<24;y++){
+
+
+for(int x=0;x<contarProv;x++){
+
+
+    objProv=archProv.leerRegistro(x);
+    if(y+1==objProv.getProvincia()){
+
+        provincias[y]++;
+
+    }
 
 }
+
+
+}
+
+for(int i=0;i<24;i++){
+
+   if(provincias[i]>22){
+    cout<<"la provincia: "<<i+1<<"tiene mas de 22 proveedores "<<endl;
+   }
+
+}
+}
+
+void PuntoF(){
+
+    //a6) Dar de baja lógica a todas las compras del año 2020.
+
+ArchivoCompra archCompra("compras.dat");
+Compra objCompra;
+
+int contarCompras=archCompra.contarRegistros();
+
+for(int x=0;x<contarCompras;x++){
+
+    objCompra=archCompra.leerRegistro(x);
+    if(objCompra.getFechaCompra().getAnio()==2020){
+
+        objCompra.setActivo(false);
+
+        sobreEscribirRegistro(objCompra,x);
+    }
+}
+
+
+
+
+}
+
+void puntoG(){
+//a7) Modificar el precio de las aberturas en el archivo de materiales. Incrementar un 10% todos los materiales de ese tipo.
+ArchivoMaterial archMaterial("materiales.dat");
+Material objMaterial;
+int contarMaterial=archMaterial.contarRegistros();
+
+for(int x=0;x<contarMaterial;x++){
+
+    objMaterial= archMaterial.leerRegistro(x);
+
+    if(objMaterial.getTipo()==3){
+       float nuevoPrecio=objMaterial.getPU()*1.10;
+       objMaterial.setPU(nuevoPrecio);
+
+    sobreEscribir(objMaterial,x);
+    }
+}
+
+
+}
+
+
+
 
 int main (){
 
@@ -197,6 +305,11 @@ puntoB();
 puntoC();
 puntoD();
 puntoE();
+PuntoF();
+puntoG();
+
+
+//a7) Modificar el precio de las aberturas en el archivo de materiales. Incrementar un 10% todos los materiales de ese tipo.
 
 
 return 0;}
